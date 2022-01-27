@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.Json;
 using Cmf.Common.Cli.Commands;
 using Cmf.Common.Cli.Commands.New;
+using Cmf.Common.Cli.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace tests.Specs
@@ -32,7 +33,7 @@ namespace tests.Specs
         public void Init()
         {
             var rnd = new Random();
-            var tmp = GetTmpDirectory();
+            var tmp = TestUtilities.GetTmpDirectory();
 
             var projectName = Convert.ToHexString(Guid.NewGuid().ToByteArray()).Substring(0, 8);
             var repoUrl = "https://repo_url/collection/project/_git/repo";
@@ -53,8 +54,8 @@ namespace tests.Specs
                 cmd.Invoke(new[]
                 {
                     projectName,
-                    "--infra", GetFixturePath("init", "infrastructure.json"),
-                    "-c", GetFixturePath("init", "config.json"),
+                    "--infra", TestUtilities.GetFixturePath("init", "infrastructure.json"),
+                    "-c", TestUtilities.GetFixturePath("init", "config.json"),
                     "--repositoryUrl", repoUrl,
                     "--MESVersion", "8.2.0",
                     "--DevTasksVersion", "8.1.0",
@@ -160,8 +161,8 @@ namespace tests.Specs
                 cmd.Invoke(new[]
                 {
                     projectName,
-                    "--infra", GetFixturePath("init", "infrastructure.json"),
-                    "-c", GetFixturePath("init", "config.json"),
+                    "--infra", TestUtilities.GetFixturePath("init", "infrastructure.json"),
+                    "-c", TestUtilities.GetFixturePath("init", "config.json"),
                     "--repositoryUrl", repoUrl,
                     "--MESVersion", "8.2.0",
                     "--DevTasksVersion", "8.1.0",
@@ -270,7 +271,7 @@ namespace tests.Specs
         {
             RunNew(new HTMLCommand(), "Cmf.Custom.HTML", extraArguments: new string[]
             {
-                "--htmlPkg", GetFixturePath("prodPkg", "Cmf.Presentation.HTML.9.9.9.zip"),
+                "--htmlPkg", TestUtilities.GetFixturePath("prodPkg", "Cmf.Presentation.HTML.9.9.9.zip"),
             }, extraAsserts: args =>
             {
                 Assert.IsTrue(File.Exists($"Cmf.Custom.HTML/.dev-tasks.json"), "dev-tasks file is missing or has wrong name. Was cloning HTML-starter unsuccessful?");
@@ -293,7 +294,7 @@ namespace tests.Specs
         public void Help()
         {
             RunNew(new Cmf.Common.Cli.Commands.New.HelpCommand(), "Cmf.Custom.Help", extraArguments: new string[] {
-                "--docPkg", GetFixturePath("prodPkg", "Cmf.Documentation.9.9.9.zip"),
+                "--docPkg", TestUtilities.GetFixturePath("prodPkg", "Cmf.Documentation.9.9.9.zip"),
             }, extraAsserts: args =>
             {
                 Assert.IsTrue(File.Exists($"Cmf.Custom.Help/.dev-tasks.json"), "dev-tasks file is missing or has wrong name. Was cloning HTML-starter unsuccessful?");
@@ -335,13 +336,13 @@ namespace tests.Specs
                 Assert.IsTrue(File.Exists($"Cmf.Custom.Database/Pre/cmfpackage.json"), "Pre Package cmfpackage.json is missing");
                 Assert.IsTrue(File.Exists($"Cmf.Custom.Database/Post/cmfpackage.json"), "Post Package cmfpackage.json is missing");
                 Assert.IsTrue(File.Exists($"Cmf.Custom.Database/Post/Reporting/cmfpackage.json"), "Reports Package cmfpackage.json is missing");
-                Assert.AreEqual("Cmf.Custom.Database.Pre", GetPackageProperty("packageId", $"Cmf.Custom.Database/Pre/cmfpackage.json"), "Pre Package Id does not match expected");
-                Assert.AreEqual(packageVersion, GetPackageProperty("version", $"Cmf.Custom.Database/Pre/cmfpackage.json"), "Pre Package version does not match expected");
-                Assert.AreEqual("Cmf.Custom.Database.Post", GetPackageProperty("packageId", $"Cmf.Custom.Database/Post/cmfpackage.json"), "Post Package Id does not match expected");
-                Assert.AreEqual(packageVersion, GetPackageProperty("version", $"Cmf.Custom.Database/Post/cmfpackage.json"), "Post Package version does not match expected");
-                Assert.AreEqual("Cmf.Custom.Reporting", GetPackageProperty("packageId", $"Cmf.Custom.Database/Post/Reporting/cmfpackage.json"), "Reporting Package Id does not match expected");
-                Assert.AreEqual(packageVersion, GetPackageProperty("version", $"Cmf.Custom.Database/Post/Reporting/cmfpackage.json"), "Reporting Package version does not match expected");
-                var pkg = GetPackage("cmfpackage.json");
+                Assert.AreEqual("Cmf.Custom.Database.Pre", TestUtilities.GetPackageProperty("packageId", $"Cmf.Custom.Database/Pre/cmfpackage.json"), "Pre Package Id does not match expected");
+                Assert.AreEqual(packageVersion, TestUtilities.GetPackageProperty("version", $"Cmf.Custom.Database/Pre/cmfpackage.json"), "Pre Package version does not match expected");
+                Assert.AreEqual("Cmf.Custom.Database.Post", TestUtilities.GetPackageProperty("packageId", $"Cmf.Custom.Database/Post/cmfpackage.json"), "Post Package Id does not match expected");
+                Assert.AreEqual(packageVersion, TestUtilities.GetPackageProperty("version", $"Cmf.Custom.Database/Post/cmfpackage.json"), "Post Package version does not match expected");
+                Assert.AreEqual("Cmf.Custom.Reporting", TestUtilities.GetPackageProperty("packageId", $"Cmf.Custom.Database/Post/Reporting/cmfpackage.json"), "Reporting Package Id does not match expected");
+                Assert.AreEqual(packageVersion, TestUtilities.GetPackageProperty("version", $"Cmf.Custom.Database/Post/Reporting/cmfpackage.json"), "Reporting Package version does not match expected");
+                var pkg = TestUtilities.GetPackage("cmfpackage.json");
                 var search = pkg.GetProperty("dependencies").EnumerateArray().ToArray().FirstOrDefault(d => d.GetProperty("id").GetString() == "Cmf.Custom.Database");
                 Assert.AreEqual(JsonValueKind.Undefined, search.ValueKind, "Package was found in root package dependencies");
             });
@@ -352,7 +353,7 @@ namespace tests.Specs
         public void Tests()
         {
             var packageId = "Cmf.Custom.Tests";
-            var dir = GetTmpDirectory();
+            var dir = TestUtilities.GetTmpDirectory();
 
             var rnd = new Random();
             var pkgVersion = $"{rnd.Next(10)}.{rnd.Next(10)}.{rnd.Next(10)}";
@@ -364,7 +365,7 @@ namespace tests.Specs
                 Directory.SetCurrentDirectory(dir);
 
                 // place new fixture: an init'd repository
-                CopyFixture("new", new DirectoryInfo(dir));
+                TestUtilities.CopyFixture("new", new DirectoryInfo(dir));
 
                 var newCommand = new TestCommand();
                 var cmd = new Command("x");
@@ -379,9 +380,9 @@ namespace tests.Specs
                 Assert.IsTrue(errors.Length == 0, "Errors found in console: {0}", errors);
                 Assert.IsTrue(Directory.Exists(packageId), "Package folder is missing");
                 Assert.IsTrue(File.Exists($"{packageId}/cmfpackage.json"), "Package cmfpackage.json is missing");
-                Assert.AreEqual(packageId, GetPackageProperty("packageId", $"{packageId}/cmfpackage.json"), "Package Id does not match expected");
-                Assert.AreEqual(pkgVersion, GetPackageProperty("version", $"{packageId}/cmfpackage.json"), "Package version does not match expected");
-                var pkg = GetPackage("cmfpackage.json");
+                Assert.AreEqual(packageId, TestUtilities.GetPackageProperty("packageId", $"{packageId}/cmfpackage.json"), "Package Id does not match expected");
+                Assert.AreEqual(pkgVersion, TestUtilities.GetPackageProperty("version", $"{packageId}/cmfpackage.json"), "Package version does not match expected");
+                var pkg = TestUtilities.GetPackage("cmfpackage.json");
                 Assert.IsNotNull(pkg.GetProperty("testPackages").EnumerateArray().ToArray().FirstOrDefault(d => d.GetProperty("id").GetString() == packageId), "Package not found in root package dependencies");
                 var masterDataPackageId = "Cmf.Custom.Tests.MasterData";
                 Assert.IsNotNull(pkg.GetProperty("testPackages").EnumerateArray().ToArray().FirstOrDefault(d => d.GetProperty("id").GetString() == masterDataPackageId), "Package not found in root package dependencies");
@@ -412,7 +413,7 @@ namespace tests.Specs
         [TestMethod]
         public void Traditional()
         {
-            var dir = GetTmpDirectory();
+            var dir = TestUtilities.GetTmpDirectory();
 
             var rnd = new Random();
             var pkgVersion = $"{rnd.Next(10)}.{rnd.Next(10)}.{rnd.Next(10)}";
@@ -422,7 +423,7 @@ namespace tests.Specs
             try
             {
                 Directory.SetCurrentDirectory(dir);
-                CopyFixture("new", new DirectoryInfo(dir));
+                TestUtilities.CopyFixture("new", new DirectoryInfo(dir));
 
                 RunNew(new BusinessCommand(), "Cmf.Custom.Business", scaffoldingDir: dir);
                 RunNew(new DataCommand(), "Cmf.Custom.Data", scaffoldingDir: dir);
@@ -448,8 +449,8 @@ namespace tests.Specs
                 var (packageVersion, _) = args;
                 Assert.IsTrue(Directory.Exists($"Features/{packageId}"), "Package folder is missing");
                 Assert.IsTrue(File.Exists($"Features/{packageId}/cmfpackage.json"), "Package cmfpackage.json is missing");
-                Assert.AreEqual(packageId, GetPackageProperty("packageId", $"Features/{packageId}/cmfpackage.json"), "Package Id does not match expected");
-                Assert.AreEqual(packageVersion, GetPackageProperty("version", $"Features/{packageId}/cmfpackage.json"), "Package version does not match expected");
+                Assert.AreEqual(packageId, TestUtilities.GetPackageProperty("packageId", $"Features/{packageId}/cmfpackage.json"), "Package Id does not match expected");
+                Assert.AreEqual(packageVersion, TestUtilities.GetPackageProperty("version", $"Features/{packageId}/cmfpackage.json"), "Package version does not match expected");
             });
             string errors = console.Error.ToString().Trim();
             Assert.IsTrue(errors.Length == 0, "Errors found in console: {0}", errors);
@@ -469,8 +470,8 @@ namespace tests.Specs
                 var (packageVersion, _) = args;
                 Assert.IsTrue(Directory.Exists($"Features/{packageId}"), "Package folder is missing");
                 Assert.IsTrue(File.Exists($"Features/{packageId}/cmfpackage.json"), "Package cmfpackage.json is missing");
-                Assert.AreEqual(packageId, GetPackageProperty("packageId", $"Features/{packageId}/cmfpackage.json"), "Package Id does not match expected");
-                Assert.AreEqual(packageVersion, GetPackageProperty("version", $"Features/{packageId}/cmfpackage.json"), "Package version does not match expected");
+                Assert.AreEqual(packageId, TestUtilities.GetPackageProperty("packageId", $"Features/{packageId}/cmfpackage.json"), "Package Id does not match expected");
+                Assert.AreEqual(packageVersion, TestUtilities.GetPackageProperty("version", $"Features/{packageId}/cmfpackage.json"), "Package version does not match expected");
             });
             string errors = console.Error.ToString().Trim();
             Assert.IsTrue(errors.Length == 0, "Errors found in console: {0}", errors);
@@ -479,7 +480,7 @@ namespace tests.Specs
         [TestMethod]
         public void Features_RootPackageWithFeature()
         {
-            var dir = GetTmpDirectory();
+            var dir = TestUtilities.GetTmpDirectory();
 
             var rnd = new Random();
             var pkgVersion = $"{rnd.Next(10)}.{rnd.Next(10)}.{rnd.Next(10)}";
@@ -489,7 +490,7 @@ namespace tests.Specs
             try
             {
                 Directory.SetCurrentDirectory(dir);
-                CopyFixture("new", new DirectoryInfo(dir));
+                TestUtilities.CopyFixture("new", new DirectoryInfo(dir));
 
                 RunFeature_WithoutPrefix(scaffoldingDir: dir);
                 var console = RunNew(new BusinessCommand(), "Cmf.Custom.Business", scaffoldingDir: dir, defaultAsserts: false);
@@ -509,7 +510,7 @@ namespace tests.Specs
         [TestMethod]
         public void Features_Business()
         {
-            var dir = GetTmpDirectory();
+            var dir = TestUtilities.GetTmpDirectory();
 
             var rnd = new Random();
             var pkgVersion = $"{rnd.Next(10)}.{rnd.Next(10)}.{rnd.Next(10)}";
@@ -519,8 +520,8 @@ namespace tests.Specs
             try
             {
                 Directory.SetCurrentDirectory(dir);
-                CopyFixture("new", new DirectoryInfo(dir));
-                CopyFixture("featureBase", new DirectoryInfo(dir));
+                TestUtilities.CopyFixture("new", new DirectoryInfo(dir));
+                TestUtilities.CopyFixture("featureBase", new DirectoryInfo(dir));
 
                 var pkgDir = Path.Join(dir, "Features", "TestFeature");
                 const string packageId = "Cmf.Custom.TestFeature.Business";
@@ -545,7 +546,7 @@ namespace tests.Specs
         [TestMethod, TestCategory("LongRunning")]
         public void Features_Help()
         {
-            var dir = GetTmpDirectory();
+            var dir = TestUtilities.GetTmpDirectory();
 
             var rnd = new Random();
             var pkgVersion = $"{rnd.Next(10)}.{rnd.Next(10)}.{rnd.Next(10)}";
@@ -555,13 +556,13 @@ namespace tests.Specs
             try
             {
                 Directory.SetCurrentDirectory(dir);
-                CopyFixture("new", new DirectoryInfo(dir));
-                CopyFixture("featureBase", new DirectoryInfo(dir));
+                TestUtilities.CopyFixture("new", new DirectoryInfo(dir));
+                TestUtilities.CopyFixture("featureBase", new DirectoryInfo(dir));
 
                 var pkgDir = Path.Join(dir, "Features", "TestFeature");
                 const string packageId = "Cmf.Custom.TestFeature.Help";
                 var console = RunNew(new Cmf.Common.Cli.Commands.New.HelpCommand(), packageId, extraArguments: new string[] {
-                    "--docPkg", GetFixturePath("prodPkg", "Cmf.Documentation.9.9.9.zip"),
+                    "--docPkg", TestUtilities.GetFixturePath("prodPkg", "Cmf.Documentation.9.9.9.zip"),
                 }, scaffoldingDir: pkgDir, extraAsserts: args =>
                 {
                     var (pkgVersion, _) = args;
@@ -590,7 +591,7 @@ namespace tests.Specs
         [TestMethod, TestCategory("LongRunning")]
         public void Features_HTML()
         {
-            var dir = GetTmpDirectory();
+            var dir = TestUtilities.GetTmpDirectory();
 
             var rnd = new Random();
             var pkgVersion = $"{rnd.Next(10)}.{rnd.Next(10)}.{rnd.Next(10)}";
@@ -600,13 +601,13 @@ namespace tests.Specs
             try
             {
                 Directory.SetCurrentDirectory(dir);
-                CopyFixture("new", new DirectoryInfo(dir));
-                CopyFixture("featureBase", new DirectoryInfo(dir));
+                TestUtilities.CopyFixture("new", new DirectoryInfo(dir));
+                TestUtilities.CopyFixture("featureBase", new DirectoryInfo(dir));
 
                 var pkgDir = Path.Join(dir, "Features", "TestFeature");
                 const string packageId = "Cmf.Custom.TestFeature.HTML";
                 var console = RunNew(new Cmf.Common.Cli.Commands.New.HTMLCommand(), packageId, extraArguments: new string[] {
-                    "--htmlPkg", GetFixturePath("prodPkg", "Cmf.Presentation.HTML.9.9.9.zip"),
+                    "--htmlPkg", TestUtilities.GetFixturePath("prodPkg", "Cmf.Presentation.HTML.9.9.9.zip"),
                 }, scaffoldingDir: pkgDir);
             }
             finally
@@ -628,9 +629,27 @@ namespace tests.Specs
             }
         }
 
+        [TestMethod]
+        public void SecurityPortal()
+        {
+            string dir = TestUtilities.GetTmpDirectory();
+            TestUtilities.CopyFixture("new", new DirectoryInfo(dir));
+
+            Random rnd = new Random();
+            string pkgVersion = $"{rnd.Next(10)}.{rnd.Next(10)}.{rnd.Next(10)}";
+
+            string cur = Directory.GetCurrentDirectory();
+
+            const string packageId = "Cmf.Custom.SecurityPortal";
+            TestConsole console = RunNew(new Cmf.Common.Cli.Commands.New.SecurityPortalCommand(), packageId, scaffoldingDir: dir);
+
+            Assert.IsTrue(File.Exists($"{dir}/Cmf.Custom.SecurityPortal/cmfpackage.json"), "Package cmfpackage.json is missing");
+            Assert.IsTrue(File.Exists($"{dir}/Cmf.Custom.SecurityPortal/config.json"), "Package config.json is missing");
+        }
+
         private TestConsole RunNew<T>(T newCommand, string packageId, string scaffoldingDir = null, string[] extraArguments = null, bool defaultAsserts = true, Action<(string, string)> extraAsserts = null) where T : TemplateCommand
         {
-            var dir = scaffoldingDir ?? GetTmpDirectory();
+            var dir = scaffoldingDir ?? TestUtilities.GetTmpDirectory();
 
             var rnd = new Random();
             var pkgVersion = $"{rnd.Next(10)}.{rnd.Next(10)}.{rnd.Next(10)}";
@@ -644,7 +663,7 @@ namespace tests.Specs
                 // place new fixture: an init'd repository
                 if (scaffoldingDir == null)
                 {
-                    CopyFixture("new", new DirectoryInfo(dir));
+                    TestUtilities.CopyFixture("new", new DirectoryInfo(dir));
                 }
 
                 var cmd = new Command("x");
@@ -666,9 +685,9 @@ namespace tests.Specs
                     Assert.IsTrue(errors.Length == 0, "Errors found in console: {0}", errors);
                     Assert.IsTrue(Directory.Exists(packageId), "Package folder is missing");
                     Assert.IsTrue(File.Exists($"{packageId}/cmfpackage.json"), "Package cmfpackage.json is missing");
-                    Assert.AreEqual(packageId, GetPackageProperty("packageId", $"{packageId}/cmfpackage.json"), "Package Id does not match expected");
-                    Assert.AreEqual(pkgVersion, GetPackageProperty("version", $"{packageId}/cmfpackage.json"), "Package version does not match expected");
-                    var pkg = GetPackage("cmfpackage.json");
+                    Assert.AreEqual(packageId, TestUtilities.GetPackageProperty("packageId", $"{packageId}/cmfpackage.json"), "Package Id does not match expected");
+                    Assert.AreEqual(pkgVersion, TestUtilities.GetPackageProperty("version", $"{packageId}/cmfpackage.json"), "Package version does not match expected");
+                    var pkg = TestUtilities.GetPackage("cmfpackage.json");
                     Assert.IsNotNull(pkg.GetProperty("dependencies").EnumerateArray().ToArray().FirstOrDefault(d => d.GetProperty("id").GetString() == packageId), "Package not found in root package dependencies");
                 }
 
@@ -703,66 +722,5 @@ namespace tests.Specs
             }
             return console;
         }
-
-        #region helpers
-
-        private string GetTmpDirectory()
-        {
-            var tmp = Path.Join(Path.GetTempPath(), Convert.ToHexString(Guid.NewGuid().ToByteArray()).Substring(0, 8));
-            Directory.CreateDirectory(tmp);
-
-            Debug.WriteLine("Generating at " + tmp);
-            return tmp;
-        }
-
-        private static string GetFixturePath(string fixture, string item)
-        {
-            return System.IO.Path.GetFullPath(
-                System.IO.Path.Join(
-            AppDomain.CurrentDomain.BaseDirectory,
-                        "..", "..", "..", "Fixtures", fixture, item));
-        }
-
-        private static void CopyFixture(string fixtureName, DirectoryInfo target)
-        {
-            Directory.CreateDirectory(target.FullName);
-            var source = new DirectoryInfo(System.IO.Path.GetFullPath(
-                System.IO.Path.Join(
-            AppDomain.CurrentDomain.BaseDirectory,
-                        "..", "..", "..", "Fixtures", fixtureName)));
-            CopyAll(source, target);
-        }
-
-        private static void CopyAll(DirectoryInfo source, DirectoryInfo target)
-        {
-            // Copy each file into the new directory.
-            foreach (FileInfo fi in source.GetFiles())
-            {
-                Console.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
-                fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
-            }
-
-            // Copy each subdirectory using recursion.
-            foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
-            {
-                DirectoryInfo nextTargetSubDir =
-                    target.CreateSubdirectory(diSourceSubDir.Name);
-                CopyAll(diSourceSubDir, nextTargetSubDir);
-            }
-        }
-
-        private static string GetPackageProperty(string property, string cmfpackageJsonPath)
-        {
-            var pkg = GetPackage(cmfpackageJsonPath);
-            return pkg.GetProperty(property).GetString();
-        }
-
-        private static JsonElement GetPackage(string cmfpackageJsonPath)
-        {
-            var json = File.ReadAllText(cmfpackageJsonPath);
-            return JsonDocument.Parse(json).RootElement;
-        }
-
-        #endregion
     }
 }
