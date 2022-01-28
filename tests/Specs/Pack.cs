@@ -1,4 +1,5 @@
 ﻿using Cmf.Common.Cli.Commands;
+using Cmf.Common.Cli.TestUtilities;
 using Cmf.Common.Cli.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;

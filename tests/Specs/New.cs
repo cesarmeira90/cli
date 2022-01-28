@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text.Json;
 using Cmf.Common.Cli.Commands;
 using Cmf.Common.Cli.Commands.New;
-using Cmf.Common.Cli.Utilities;
+using Cmf.Common.Cli.TestUtilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace tests.Specs
